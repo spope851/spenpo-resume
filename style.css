@@ -1,0 +1,90 @@
+/* Base section styles */
+[class^="spenpo-resume-section-"] {
+    margin-bottom: 2rem;
+}
+
+/* Section titles */
+[class^="spenpo-resume-section-title-"] {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #000;
+}
+
+/* Content containers */
+[class^="spenpo-resume-section-content-"] {
+    margin-left: 0rem;
+}
+
+/* Text content items */
+[class^="spenpo-resume-section-content-item-"] {
+    margin-bottom: 0rem;
+}
+
+[class^="spenpo-resume-section-content-label-"] {
+    margin-right: 0rem;
+}
+
+[class^="spenpo-resume-section-content-text-container-"] {
+    display: inline;
+}
+
+/* List content */
+[class^="spenpo-resume-section-content-list-"] {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+[class^="spenpo-resume-section-content-list-item-"] {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0rem;
+}
+
+/* Nested content */
+[class^="spenpo-resume-section-content-nested-"] {
+    margin-left: 0rem;
+}
+
+[class^="spenpo-resume-section-content-nested-item-"] {
+    margin-bottom: 0rem;
+}
+
+[class^="spenpo-resume-section-content-nested-item-title-"] {
+    font-weight: bold;
+    margin-right: 0rem;
+}
+
+[class^="spenpo-resume-section-content-nested-item-link-"] {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+[class^="spenpo-resume-section-content-nested-item-link-"]:hover {
+    text-decoration: underline;
+}
+
+[class^="spenpo-resume-section-content-nested-item-sub-title-"] {
+    font-style: italic;
+    color: #666;
+    float: right;
+}
+
+[class^="spenpo-resume-section-content-nested-item-text-"] {
+    margin: 0.5rem 0;
+}
+
+[class^="spenpo-resume-section-content-nested-item-text-"].ml-5 {
+    margin-left: 40px;
+}
+
+[class^="spenpo-resume-section-content-nested-item-text-title-"] {
+    font-weight: bold;
+    margin-left: 16px;
+}
+
+[class^="spenpo-resume-section-content-nested-item-text-sub-title-"] {
+    font-style: italic;
+    color: #666;
+    float: right;
+} 
