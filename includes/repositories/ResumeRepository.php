@@ -1,0 +1,41 @@
+<?php
+class ResumeRepository {
+    private $wpdb;
+
+    public function __construct() {
+        global $wpdb;
+        $this->wpdb = $wpdb;
+    }
+
+    public function getTextSections() {
+        return $this->wpdb->get_results("
+            SELECT s.*, tc.label, tc.text as content_text
+            FROM {$this->wpdb->prefix}resume_sections s
+            LEFT JOIN {$this->wpdb->prefix}resume_section_text_content tc ON s.id = tc.section_id
+            WHERE s.content_type = 'text'
+        ");
+    }
+
+    public function getListSections() {
+        return $this->wpdb->get_results("
+            SELECT s.*, li.text, li.year, li.link, li.year_link
+            FROM {$this->wpdb->prefix}resume_sections s
+            LEFT JOIN {$this->wpdb->prefix}resume_section_items li ON s.id = li.section_id
+            WHERE s.content_type = 'list'
+        ");
+    }
+
+    public function getNestedSections() {
+        return $this->wpdb->get_results("
+            SELECT s.*, ns.id as nested_id, ns.title as nested_title, ns.link_title, 
+                ns.href, ns.sub_title as nested_sub_title,
+                nsd.id as detail_id, nsd.text, nsd.title as detail_title, 
+                nsd.sub_title as detail_sub_title, nsd.indent
+            FROM {$this->wpdb->prefix}resume_sections s
+            LEFT JOIN {$this->wpdb->prefix}resume_nested_sections ns ON s.id = ns.section_id
+            LEFT JOIN {$this->wpdb->prefix}resume_nested_section_details nsd ON ns.id = nsd.nested_section_id
+            WHERE s.content_type = 'nested'
+            ORDER BY s.id, ns.id, nsd.id
+        ");
+    }
+} 

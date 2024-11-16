@@ -1,0 +1,4 @@
+kind: Changed
+body: added $type param to executeScript function to choose between dbDelta() and
+  $wpdb->query()
+time: 2024-11-16T12:24:31.745811+08:00

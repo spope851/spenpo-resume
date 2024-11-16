@@ -1,0 +1,3 @@
+kind: Changed
+body: refactored repository pattern to abstract specific code into classes
+time: 2024-11-16T12:25:07.013887+08:00

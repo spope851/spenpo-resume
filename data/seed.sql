@@ -3,7 +3,9 @@ CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}resume_sections` (
     `title` varchar(255) NOT NULL,
     `default_expanded` tinyint(1) DEFAULT 0,
     `content_type` enum('text','list','nested') NOT NULL,
-    PRIMARY KEY  (`id`)
+    `display_order` int(11) DEFAULT 0,
+    PRIMARY KEY  (`id`),
+    UNIQUE KEY `unique_display_order` (`display_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}resume_section_items` (
@@ -52,8 +54,8 @@ CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}resume_nested_section_details` (
 -- dummy data
 -- Insert Skills section
 INSERT INTO `{$wpdb->prefix}resume_sections` 
-(id, title, default_expanded, content_type) 
-VALUES (1, 'Skills', 0, 'text');
+(id, title, default_expanded, content_type, display_order) 
+VALUES (1, 'Skills', 0, 'text', 10);
 
 INSERT INTO `{$wpdb->prefix}resume_section_text_content` 
 (section_id, label, text) VALUES
@@ -62,8 +64,8 @@ INSERT INTO `{$wpdb->prefix}resume_section_text_content`
 
 -- Insert Experience section
 INSERT INTO `{$wpdb->prefix}resume_sections` 
-(id, title, default_expanded, content_type) 
-VALUES (2, 'Experience', 1, 'nested');
+(id, title, default_expanded, content_type, display_order) 
+VALUES (2, 'Experience', 1, 'nested', 20);
 
 -- Insert Homeroom Teacher position
 INSERT INTO `{$wpdb->prefix}resume_nested_sections`
@@ -87,8 +89,8 @@ INSERT INTO `{$wpdb->prefix}resume_nested_section_details`
 
 -- Insert Achievements section
 INSERT INTO `{$wpdb->prefix}resume_sections` 
-(id, title, default_expanded, content_type) 
-VALUES (3, 'Achievements', 0, 'list');
+(id, title, default_expanded, content_type, display_order) 
+VALUES (3, 'Achievements', 0, 'list', 30);
 
 INSERT INTO `{$wpdb->prefix}resume_section_items`
 (section_id, text, year) VALUES
@@ -97,8 +99,8 @@ INSERT INTO `{$wpdb->prefix}resume_section_items`
 
 -- Insert Certifications section
 INSERT INTO `{$wpdb->prefix}resume_sections` 
-(id, title, default_expanded, content_type) 
-VALUES (4, 'Certifications', 0, 'list');
+(id, title, default_expanded, content_type, display_order) 
+VALUES (4, 'Certifications', 0, 'list', 40);
 
 INSERT INTO `{$wpdb->prefix}resume_section_items`
 (section_id, text, link, year, year_link) VALUES
@@ -106,8 +108,8 @@ INSERT INTO `{$wpdb->prefix}resume_section_items`
 
 -- Insert Formal Education section
 INSERT INTO `{$wpdb->prefix}resume_sections` 
-(id, title, default_expanded, content_type) 
-VALUES (5, 'Formal Education', 0, 'nested');
+(id, title, default_expanded, content_type, display_order) 
+VALUES (5, 'Formal Education', 0, 'nested', 50);
 
 -- Insert UNH education
 INSERT INTO `{$wpdb->prefix}resume_nested_sections`

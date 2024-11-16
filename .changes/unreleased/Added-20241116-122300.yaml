@@ -1,0 +1,3 @@
+kind: Added
+body: teardown script for dropping tables when uninstalling the plugin
+time: 2024-11-16T12:23:00.703979+08:00
