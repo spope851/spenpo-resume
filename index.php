@@ -49,5 +49,6 @@ function enqueue_resume_styles() {
     );
 }
 add_action('wp_enqueue_scripts', 'enqueue_resume_styles');
+add_action('init', ['ResumeAPI', 'registerRoutes']); 
 
 

@@ -1,41 +1,25 @@
 <?php
 class ResumeShortcode {
-    private $repository;
+    private $api;
 
     public function __construct() {
-        $this->repository = new ResumeRepository();
+        require_once(plugin_dir_path(__FILE__) . '../api/ResumeAPI.php');
+        $this->api = ResumeAPI::getInstance();
         add_shortcode('spenpo_resume', [$this, 'render']);
     }
 
     public function render() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'resume_sections';
+        // Get data using the singleton instance
+        $sections = $this->api->fetchResume();
         
-        // Get all sections with their content in a single query based on content_type
-        $text_sections = $this->repository->getTextSections();
-        $list_sections = $this->repository->getListSections();
-        $nested_sections = $this->repository->getNestedSections();
-    
-        // Group results by section_id for easier processing
-        $grouped_text = array_reduce($text_sections, function($acc, $item) {
-            $acc[$item->id][] = $item;
-            return $acc;
-        }, []);
-    
-        $grouped_list = array_reduce($list_sections, function($acc, $item) {
-            $acc[$item->id][] = $item;
-            return $acc;
-        }, []);
-    
-        $grouped_nested = array_reduce($nested_sections, function($acc, $item) {
-            $acc[$item->id][] = $item;
-            return $acc;
-        }, []);
-    
-        $results = $wpdb->get_results("SELECT * FROM $table_name");
         $dom = new DOMDocument('1.0', 'utf-8');
         
-        foreach ($results as $section) {
+        // Create a root container for all sections
+        $root = $dom->createElement('div');
+        $root->setAttribute('class', 'spenpo-resume-container');
+        $dom->appendChild($root);
+        
+        foreach ($sections as $section) {
             // Generate HTML using DOMDocument
             $section_div = $dom->createElement('div');
     
@@ -54,9 +38,8 @@ class ResumeShortcode {
             $section_content->setAttribute('class', "spenpo-resume-section-content-$section->id");
     
             // get content
-            if ($section->content_type === 'text') {
-                $section_query = $grouped_text[$section->id] ?? [];
-                foreach ($section_query as $content) {
+            if ($section->content->type === 'text') {
+                foreach ($section->content->textContent as $content) {
                     $section_content_item = $dom->createElement('p');
                     $section_content_item->setAttribute('class', "spenpo-resume-section-content-item-$content->id");
                     $section_content_label = $dom->createElement('strong');
@@ -66,18 +49,18 @@ class ResumeShortcode {
                     $section_content_item->appendChild($section_content_label);
                     $section_content_text_container = $dom->createElement('span');
                     $section_content_text_container->setAttribute('class', "spenpo-resume-section-content-text-container-$content->id");
-                    $section_content_text = $dom->createTextNode($content->content_text);
+                    $section_content_text = $dom->createTextNode($content->text);
                     $section_content_text_container->appendChild($section_content_text);
                     $section_content_item->appendChild($section_content_text_container);
                     $section_content->appendChild($section_content_item);
                 }
+                $section_div->appendChild($section_content);
             }
     
-            if ($section->content_type === 'list') {
-                $section_content_list_items = $grouped_list[$section->id] ?? [];
+            if ($section->content->type === 'list') {
                 $section_content_list = $dom->createElement('ul');
                 $section_content_list->setAttribute('class', "spenpo-resume-section-content-list-$section->id");
-                foreach ($section_content_list_items as $item) {
+                foreach ($section->content->items as $item) {
                     $section_content_list_item = $dom->createElement('li');
                     $section_content_list_item->setAttribute('class', "spenpo-resume-section-content-list-item-$item->id");
                     
@@ -96,9 +79,9 @@ class ResumeShortcode {
                     
                     // year
                     $section_content_list_item_year;
-                    if (isset($item->year_link)) {
+                    if (isset($item->yearLink)) {
                         $section_content_list_item_year = $dom->createElement('a');
-                        $section_content_list_item_year->setAttribute('href', $item->year_link);
+                        $section_content_list_item_year->setAttribute('href', $item->yearLink);
                     } else {
                         $section_content_list_item_year = $dom->createElement('span');
                         $section_content_list_item_year->setAttribute('class', "spenpo-resume-section-content-list-item-year-$item->id");
@@ -112,80 +95,81 @@ class ResumeShortcode {
                 $section_div->appendChild($section_content_list);
             }
     
-            if ($section->content_type === 'nested') {
+            if ($section->content->type === 'nested') {
                 $section_content_nested = $dom->createElement('div');
                 $section_content_nested->setAttribute('class', "spenpo-resume-section-content-nested-$section->id");
-                $section_content_nested_items = $grouped_nested[$section->id] ?? [];
     
                 $current_nested_item = null;
-                foreach ($section_content_nested_items as $item) {
+                foreach ($section->content->nestedSections as $item) {
                     // Only create new nested item container if we're on a new nested section
-                    if ($current_nested_item === null || $current_nested_item !== $item->nested_id) {
+                    if ($current_nested_item === null || $current_nested_item !== $item->id) {
                         // container
                         $section_content_nested_item = $dom->createElement('div');
-                        $section_content_nested_item->setAttribute('class', "spenpo-resume-section-content-nested-item-$item->nested_id");
+                        $section_content_nested_item->setAttribute('class', "spenpo-resume-section-content-nested-item-$item->id");
     
                         // title
-                        if ($item->nested_title) {
+                        if ($item->title) {
                             $section_content_nested_title = $dom->createElement('span');
-                            $section_content_nested_title->setAttribute('class', "spenpo-resume-section-content-nested-item-title-$item->nested_id");
-                            $section_content_nested_title_text = $dom->createTextNode($item->nested_title . ": ");
+                            $section_content_nested_title->setAttribute('class', "spenpo-resume-section-content-nested-item-title-$item->id");
+                            $section_content_nested_title_text = $dom->createTextNode($item->title . ": ");
                             $section_content_nested_title->appendChild($section_content_nested_title_text);
                             $section_content_nested_item->appendChild($section_content_nested_title);
                         }
     
                         // link
-                        if ($item->link_title) {
+                        if ($item->linkTitle) {
                             $section_content_nested_link = $dom->createElement('a');
-                            $section_content_nested_link->setAttribute('class', "spenpo-resume-section-content-nested-item-link-$item->nested_id");
+                            $section_content_nested_link->setAttribute('class', "spenpo-resume-section-content-nested-item-link-$item->id");
                             $section_content_nested_link->setAttribute('href', $item->href);
-                            $section_content_nested_link_text = $dom->createTextNode($item->link_title);
+                            $section_content_nested_link_text = $dom->createTextNode($item->linkTitle);
                             $section_content_nested_link->appendChild($section_content_nested_link_text);
                             $section_content_nested_item->appendChild($section_content_nested_link);
                         }
     
                         // sub title
-                        if ($item->nested_sub_title) {
+                        if ($item->subTitle) {
                             $section_content_nested_sub_title = $dom->createElement('span');
-                            $section_content_nested_sub_title->setAttribute('class', "spenpo-resume-section-content-nested-item-sub-title-$item->nested_id");
-                            $section_content_nested_sub_title_text = $dom->createTextNode($item->nested_sub_title);
+                            $section_content_nested_sub_title->setAttribute('class', "spenpo-resume-section-content-nested-item-sub-title-$item->id");
+                            $section_content_nested_sub_title_text = $dom->createTextNode($item->subTitle);
                             $section_content_nested_sub_title->appendChild($section_content_nested_sub_title_text);
                             $section_content_nested_item->appendChild($section_content_nested_sub_title);
                         }
     
-                        $current_nested_item = $item->nested_id;
+                        $current_nested_item = $item->id;
                     }
     
                     // Create detail content (previously in the nested query)
-                    if ($item->detail_id) {
+                    foreach ($item->details as $detail) {
                         $section_content_nested_item_content;
-                        if (isset($item->detail_title)) {
+                        if (isset($detail->title)) {
                             $section_content_nested_item_content = $dom->createElement('div');
-                            $section_content_nested_item_content->setAttribute('class', "spenpo-resume-section-content-nested-item-text-$item->detail_id");
+                            $section_content_nested_item_content->setAttribute('class', "spenpo-resume-section-content-nested-item-text-$detail->id");
     
                             // title
                             $section_content_nested_item_text_title_content = $dom->createElement('span');
-                            $section_content_nested_item_text_title_content->setAttribute('class', "spenpo-resume-section-content-nested-item-text-title-$item->detail_id");
-                            $section_content_nested_item_text_title_content_text = $dom->createTextNode($item->detail_title);
+                            $section_content_nested_item_text_title_content->setAttribute('class', "spenpo-resume-section-content-nested-item-text-title-$detail->id");
+                            $section_content_nested_item_text_title_content_text = $dom->createTextNode($detail->title);
                             $section_content_nested_item_text_title_content->appendChild($section_content_nested_item_text_title_content_text);
                             $section_content_nested_item_content->appendChild($section_content_nested_item_text_title_content);
     
                             // sub title
                             $section_content_nested_item_text_sub_title_content = $dom->createElement('span');
-                            $section_content_nested_item_text_sub_title_content->setAttribute('class', "spenpo-resume-section-content-nested-item-text-sub-title-$item->detail_id");
-                            $section_content_nested_item_text_sub_title_content_text = $dom->createTextNode($item->detail_sub_title);
+                            $section_content_nested_item_text_sub_title_content->setAttribute('class', "spenpo-resume-section-content-nested-item-text-sub-title-$detail->id");
+                            $section_content_nested_item_text_sub_title_content_text = $dom->createTextNode($detail->subTitle);
                             $section_content_nested_item_text_sub_title_content->appendChild($section_content_nested_item_text_sub_title_content_text);
                             $section_content_nested_item_content->appendChild($section_content_nested_item_text_sub_title_content);
                         } else {
                             $section_content_nested_item_content = $dom->createElement('p');
-                            $section_content_nested_item_content->setAttribute('class', "spenpo-resume-section-content-nested-item-text-$item->detail_id");
-                            $section_content_nested_item_text_content_text = $dom->createTextNode($item->text);
+                            $section_content_nested_item_content->setAttribute('class', "spenpo-resume-section-content-nested-item-text-$detail->id");
+                            $section_content_nested_item_text_content_text = $dom->createTextNode($detail->text);
                             $section_content_nested_item_content->appendChild($section_content_nested_item_text_content_text);
                         }
-                        if ($item->indent) {
+
+                        if (isset($detail->indent)) {
                             $existing_classes = $section_content_nested_item_content->getAttribute('class');
-                            $section_content_nested_item_content->setAttribute('class', "$existing_classes"." ml-$item->indent");
+                            $section_content_nested_item_content->setAttribute('class', "$existing_classes"." ml-$detail->indent");
                         }
+
                         $section_content_nested_item->appendChild($section_content_nested_item_content);
                     }
     
@@ -194,8 +178,8 @@ class ResumeShortcode {
                 $section_div->appendChild($section_content_nested);
             }
     
-            $section_div->appendChild($section_content);
-            $dom->appendChild($section_div);
+            // Append to root instead of directly to dom
+            $root->appendChild($section_div);
         }
         
         // Convert DOMDocument to HTML string

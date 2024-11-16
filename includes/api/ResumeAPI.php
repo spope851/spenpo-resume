@@ -1,123 +1,141 @@
 <?php
 class ResumeAPI {
-    private $repository;
+    private $repository = null;
+    private static $instance = null;
 
-    public function __construct() {
-        $this->repository = new ResumeRepository();
-        $this->registerRoutes();
+    private function __construct() {
+        // Empty private constructor
     }
 
-    public function registerRoutes() {
-        add_action('rest_api_init', function() {
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    private function getRepository() {
+        if ($this->repository === null) {
+            $this->repository = new ResumeRepository();
+        }
+        return $this->repository;
+    }
+
+    public static function registerRoutes() {
+        $instance = self::getInstance();
+        add_action('rest_api_init', function() use ($instance) {
             register_rest_route('spenpo/v1', '/resume', [
                 'methods' => 'GET',
-                'callback' => [$this, 'fetchResume'],
-                'permission_callback' => '__return_true',
-            ]);
-
-            register_rest_route('spenpo/v1', '/posts/(?P<id>\d+)/blocks', [
-                'methods' => 'GET',
-                'callback' => [$this, 'getBlocks'],
+                'callback' => [$instance, 'getResumeResponse'],
                 'permission_callback' => '__return_true',
             ]);
         });
     }
 
+    public function getResumeResponse() {
+        return new WP_REST_Response($this->fetchResume(), 200);
+    }
+
     public function fetchResume() {
-        // Get all sections with their related content in one query for each type
-        $text_sections = $this->repository->getTextSections();
-    
-        $list_sections = $this->repository->getListSections();
-    
-        $nested_sections = $this->repository->getNestedSections();
-    
+        // Get all sections and merge them into one array
+        $repository = $this->getRepository();
+        $all_sections = array_merge(
+            $repository->getTextSections(),
+            $repository->getListSections(),
+            $repository->getNestedSections()
+        );
+
+        // Sort sections by display_order
+        usort($all_sections, function($a, $b) {
+            return $a->display_order - $b->display_order;
+        });
+
         // Group the results by section type
         $sections_by_id = [];
         
-        // Process text sections
-        foreach ($text_sections as $row) {
+        // Process all sections in one loop
+        foreach ($all_sections as $row) {
             if (!isset($sections_by_id[$row->id])) {
-                $sections_by_id[$row->id] = [
-                    'title' => $row->title,
-                    'defaultExpanded' => (bool)$row->default_expanded,
-                    'content' => [
-                        'type' => 'text',
-                        'textContent' => []
-                    ]
-                ];
+                $section = new stdClass();
+                $section->id = $row->id;
+                $section->title = $row->title;
+                $section->defaultExpanded = (bool)$row->default_expanded;
+                $section->content = new stdClass();
+                $section->content->type = $row->content_type;
+
+                // Initialize content structure based on type
+                switch ($row->content_type) {
+                    case 'text':
+                        $section->content->textContent = [];
+                        break;
+                    case 'list':
+                        $section->content->items = [];
+                        break;
+                    case 'nested':
+                        $section->content->nestedSections = [];
+                        break;
+                }
+                
+                $sections_by_id[$row->id] = $section;
             }
-            if ($row->label) {
-                $sections_by_id[$row->id]['content']['textContent'][] = [
-                    'label' => $row->label,
-                    'text' => $row->content_text
-                ];
+
+            // Process content based on type
+            switch ($row->content_type) {
+                case 'text':
+                    if ($row->label) {
+                        $content = new stdClass();
+                        $content->id = $row->content_id;
+                        $content->label = $row->label;
+                        $content->text = $row->content_text;
+                        $sections_by_id[$row->id]->content->textContent[] = $content;
+                    }
+                    break;
+
+                case 'list':
+                    if ($row->text) {
+                        $item = new stdClass();
+                        $item->id = $row->content_id;
+                        $item->text = $row->text;
+                        $item->year = $row->year;
+                        if ($row->link) $item->link = $row->link;
+                        if ($row->year_link) $item->yearLink = $row->year_link;
+                        $sections_by_id[$row->id]->content->items[] = $item;
+                    }
+                    break;
+
+                case 'nested':
+                    if ($row->nested_id && !isset($sections_by_id[$row->id]->content->nestedSections[$row->nested_id])) {
+                        $nested = new stdClass();
+                        $nested->id = $row->nested_id;
+                        $nested->title = $row->nested_title;
+                        $nested->linkTitle = $row->link_title;
+                        $nested->href = $row->href;
+                        $nested->subTitle = $row->nested_sub_title;
+                        $nested->details = [];
+                        $sections_by_id[$row->id]->content->nestedSections[$row->nested_id] = $nested;
+                    }
+                    
+                    if ($row->nested_id && ($row->text || $row->detail_title || $row->detail_sub_title)) {
+                        $detail = new stdClass();
+                        $detail->id = $row->detail_id;
+                        if ($row->text) $detail->text = $row->text;
+                        if ($row->detail_title) $detail->title = $row->detail_title;
+                        if ($row->detail_sub_title) $detail->subTitle = $row->detail_sub_title;
+                        if ($row->indent) $detail->indent = $row->indent;
+                        $sections_by_id[$row->id]->content->nestedSections[$row->nested_id]->details[] = $detail;
+                    }
+                    break;
             }
         }
-    
-        // Process list sections
-        foreach ($list_sections as $row) {
-            if (!isset($sections_by_id[$row->id])) {
-                $sections_by_id[$row->id] = [
-                    'title' => $row->title,
-                    'defaultExpanded' => (bool)$row->default_expanded,
-                    'content' => [
-                        'type' => 'list',
-                        'items' => []
-                    ]
-                ];
-            }
-            if ($row->text) {
-                $list_item = [
-                    'text' => $row->text,
-                    'year' => $row->year
-                ];
-                if ($row->link) $list_item['link'] = $row->link;
-                if ($row->year_link) $list_item['yearLink'] = $row->year_link;
-                $sections_by_id[$row->id]['content']['items'][] = $list_item;
-            }
-        }
-    
-        // Process nested sections
-        foreach ($nested_sections as $row) {
-            if (!isset($sections_by_id[$row->id])) {
-                $sections_by_id[$row->id] = [
-                    'title' => $row->title,
-                    'defaultExpanded' => (bool)$row->default_expanded,
-                    'content' => [
-                        'type' => 'nested',
-                        'nestedSections' => []
-                    ]
-                ];
-            }
-            
-            if ($row->nested_id && !isset($sections_by_id[$row->id]['content']['nestedSections'][$row->nested_id])) {
-                $sections_by_id[$row->id]['content']['nestedSections'][$row->nested_id] = [
-                    'title' => $row->nested_title,
-                    'linkTitle' => $row->link_title,
-                    'href' => $row->href,
-                    'subTitle' => $row->nested_sub_title,
-                    'details' => []
-                ];
-            }
-            
-            if ($row->nested_id && ($row->text || $row->detail_title || $row->detail_sub_title)) {
-                $detail = [];
-                if ($row->text) $detail['text'] = $row->text;
-                if ($row->detail_title) $detail['title'] = $row->detail_title;
-                if ($row->detail_sub_title) $detail['subTitle'] = $row->detail_sub_title;
-                if ($row->indent) $detail['indent'] = $row->indent;
-                $sections_by_id[$row->id]['content']['nestedSections'][$row->nested_id]['details'][] = $detail;
-            }
-        }
-    
+
         // Convert nested sections associative arrays to indexed arrays
-        foreach ($sections_by_id as &$section) {
-            if ($section['content']['type'] === 'nested') {
-                $section['content']['nestedSections'] = array_values($section['content']['nestedSections']);
+        foreach ($sections_by_id as $section) {
+            if ($section->content->type === 'nested') {
+                $section->content->nestedSections = array_values($section->content->nestedSections);
             }
         }
-    
-        return new WP_REST_Response(array_values($sections_by_id), 200);
+
+        return array_values($sections_by_id);
     }
 
     public function getBlocks($data) {
@@ -131,6 +149,3 @@ class ResumeAPI {
         return $blocks;
     }
 }
-
-// Initialize API
-new ResumeAPI(); 

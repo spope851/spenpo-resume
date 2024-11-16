@@ -9,7 +9,7 @@ class ResumeRepository {
 
     public function getTextSections() {
         return $this->wpdb->get_results("
-            SELECT s.*, tc.label, tc.text as content_text
+            SELECT s.*, tc.id as content_id, tc.label, tc.text as content_text
             FROM {$this->wpdb->prefix}resume_sections s
             LEFT JOIN {$this->wpdb->prefix}resume_section_text_content tc ON s.id = tc.section_id
             WHERE s.content_type = 'text'
@@ -18,7 +18,7 @@ class ResumeRepository {
 
     public function getListSections() {
         return $this->wpdb->get_results("
-            SELECT s.*, li.text, li.year, li.link, li.year_link
+            SELECT s.*, li.id as content_id, li.text, li.year, li.link, li.year_link
             FROM {$this->wpdb->prefix}resume_sections s
             LEFT JOIN {$this->wpdb->prefix}resume_section_items li ON s.id = li.section_id
             WHERE s.content_type = 'list'

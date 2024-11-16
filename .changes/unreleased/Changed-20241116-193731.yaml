@@ -1,0 +1,4 @@
+kind: Changed
+body: refactored the api to use the singleton pattern and serve the json and the REST
+  route separately. now all consumers including the plugin shortcode are serviced by the same function fetchResume.
+time: 2024-11-16T19:37:31.869429+08:00
