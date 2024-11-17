@@ -38,11 +38,11 @@ class DatabaseManager {
             foreach ($statements as $statement) {
                 error_log("Executing statement: " . $statement);
                 if ($type === 'init') {
-                    $result = $wpdb->query($statement);
-                    error_log("wpdb->query result: " . print_r($result, true));
-                } else if ($type === 'query') {
                     $result = dbDelta($statement);
                     error_log("dbDelta result: " . print_r($result, true));
+                } else if ($type === 'query') {
+                    $result = $wpdb->query($statement);
+                    error_log("wpdb->query result: " . print_r($result, true));
                 } else {
                     error_log("Unknown type: " . $type);
                 }
