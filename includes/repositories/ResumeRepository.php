@@ -1,22 +1,55 @@
 <?php
+/**
+ * Handles database operations for resume data.
+ * 
+ * @package Spenpo\Resume
+ * @since 1.0.0
+ */
 class ResumeRepository {
+    /** @var wpdb WordPress database instance */
     private $wpdb;
 
+    /**
+     * Constructor initializes the WordPress database connection.
+     */
     public function __construct() {
         global $wpdb;
         $this->wpdb = $wpdb;
     }
 
+    /**
+     * Retrieves all text sections from the database.
+     * 
+     * @return array Array of text section objects
+     * @throws Exception When database error occurs
+     */
     public function getTextSections() {
-        return $this->wpdb->get_results("
-            SELECT s.*, tc.id as content_id, tc.label, tc.text as content_text
-            FROM {$this->wpdb->prefix}resume_sections s
-            LEFT JOIN {$this->wpdb->prefix}resume_section_text_content tc ON s.id = tc.section_id
-            WHERE s.content_type = 'text'
-            ORDER BY s.display_order, tc.display_order
-        ");
+        try {
+            $results = $this->wpdb->get_results("
+                SELECT s.*, tc.id as content_id, tc.label, tc.text as content_text
+                FROM {$this->wpdb->prefix}resume_sections s
+                LEFT JOIN {$this->wpdb->prefix}resume_section_text_content tc ON s.id = tc.section_id
+                WHERE s.content_type = 'text'
+                ORDER BY s.display_order, tc.display_order
+            ");
+            
+            if ($this->wpdb->last_error) {
+                error_log('Database error in getTextSections: ' . $this->wpdb->last_error);
+                throw new Exception('Database error occurred');
+            }
+            
+            return $results;
+        } catch (Exception $e) {
+            error_log('Error in getTextSections: ' . $e->getMessage());
+            return [];
+        }
     }
 
+    /**
+     * Retrieves all list sections from the database.
+     * 
+     * @return array Array of list section objects
+     */
     public function getListSections() {
         return $this->wpdb->get_results("
             SELECT s.*, li.id as content_id, li.text, li.year, li.link, li.year_link
@@ -27,6 +60,11 @@ class ResumeRepository {
         ");
     }
 
+    /**
+     * Retrieves all nested sections from the database.
+     * 
+     * @return array Array of nested section objects
+     */
     public function getNestedSections() {
         return $this->wpdb->get_results("
             SELECT s.*, ns.id as nested_id, ns.title as nested_title, ns.link_title, 

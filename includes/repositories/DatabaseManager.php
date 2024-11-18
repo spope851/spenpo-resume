@@ -1,5 +1,18 @@
 <?php
+/**
+ * Manages database operations for the resume plugin.
+ * 
+ * @package Spenpo\Resume
+ * @since 1.0.0
+ */
 class DatabaseManager {
+    /**
+     * Executes an SQL script file.
+     * 
+     * @param string $scriptPath Path to the SQL script file
+     * @param string $type Type of execution ('query' or 'init')
+     * @return array Result array with 'success' boolean and 'message'/'error' string
+     */
     public static function executeScript(string $scriptPath, string $type = 'query'): array {
         global $wpdb;
         
@@ -66,11 +79,30 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Creates or updates the database schema.
+     * 
+     * @return void
+     */
     public static function createDatabase() {
-        $script_path = plugin_dir_path(dirname(__FILE__)) . '../data/seed.sql';
-        self::executeScript($script_path, 'init');
+        $current_version = get_option('spenpo_resume_db_version', '0');
+        $plugin_version = '1.0.0';
+        
+        if (version_compare($current_version, $plugin_version, '<')) {
+            $script_path = plugin_dir_path(dirname(__FILE__)) . '../data/seed.sql';
+            $result = self::executeScript($script_path, 'init');
+            
+            if ($result['success']) {
+                update_option('spenpo_resume_db_version', $plugin_version);
+            }
+        }
     }
 
+    /**
+     * Removes all plugin tables from the database.
+     * 
+     * @return void
+     */
     public static function teardownDatabase() {
         $script_path = plugin_dir_path(dirname(__FILE__)) . '../data/teardown.sql';
         self::executeScript($script_path, 'query');

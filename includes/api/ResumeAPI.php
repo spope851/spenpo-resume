@@ -1,12 +1,28 @@
 <?php
+/**
+ * Handles all Resume API functionality and route registration.
+ * 
+ * @package Spenpo\Resume
+ * @since 1.0.0
+ */
 class ResumeAPI {
+    /** @var ResumeRepository|null */
     private $repository = null;
+
+    /** @var self|null */
     private static $instance = null;
 
-    private function __construct() {
-        // Empty private constructor
-    }
+    /**
+     * Private constructor to prevent direct instantiation.
+     * Use getInstance() instead.
+     */
+    private function __construct() {}
 
+    /**
+     * Gets the singleton instance of the API class.
+     * 
+     * @return self The singleton instance
+     */
     public static function getInstance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -14,6 +30,11 @@ class ResumeAPI {
         return self::$instance;
     }
 
+    /**
+     * Gets or creates the repository instance.
+     * 
+     * @return ResumeRepository
+     */
     private function getRepository() {
         if ($this->repository === null) {
             $this->repository = new ResumeRepository();
@@ -21,21 +42,55 @@ class ResumeAPI {
         return $this->repository;
     }
 
+    /**
+     * Registers REST API routes for the resume functionality.
+     * 
+     * @return void
+     */
     public static function registerRoutes() {
         $instance = self::getInstance();
         add_action('rest_api_init', function() use ($instance) {
             register_rest_route('spenpo/v1', '/resume', [
                 'methods' => 'GET',
                 'callback' => [$instance, 'getResumeResponse'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [$instance, 'checkPermission'],
             ]);
         });
     }
 
+    /**
+     * Checks if the current request has permission to access the API.
+     * 
+     * @return bool True if permitted, false otherwise
+     */
+    public function checkPermission() {
+        // Get the authentication setting (you'll need to implement this setting in your plugin)
+        $require_auth = get_option('resume_api_require_auth', false);
+        
+        if (!$require_auth) {
+            return true;
+        }
+
+        // If auth is required, verify nonce
+        $nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
+        return wp_verify_nonce($nonce, 'wp_rest');
+    }
+
+    /**
+     * Handles the REST API response for resume data.
+     * 
+     * @return WP_REST_Response
+     */
     public function getResumeResponse() {
+        // Remove nonce check from here since it's now handled in checkPermission
         return new WP_REST_Response($this->fetchResume(), 200);
     }
 
+    /**
+     * Fetches and formats all resume data from the repository.
+     * 
+     * @return array Formatted resume sections
+     */
     public function fetchResume() {
         // Get all sections and merge them into one array
         $repository = $this->getRepository();

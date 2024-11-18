@@ -1,18 +1,54 @@
 <?php
+/**
+ * Handles the [spenpo_resume] shortcode functionality.
+ * 
+ * @package Spenpo\Resume
+ * @since 1.0.0
+ */
 class ResumeShortcode {
+    /** @var ResumeAPI Instance of the Resume API */
     private $api;
 
+    /**
+     * Constructor initializes the API connection and registers the shortcode.
+     */
     public function __construct() {
         $this->api = ResumeAPI::getInstance();
         add_shortcode('spenpo_resume', [$this, 'render']);
     }
 
+    /**
+     * Renders the resume content as HTML.
+     * 
+     * @return string HTML output of the resume
+     */
     public function render() {
         // Get data using the singleton instance
         $sections = $this->api->fetchResume();
         
+        /**
+         * Fires before the resume is rendered.
+         *
+         * @since 1.0.0
+         * 
+         * @param array $sections The resume sections data
+         */
+        do_action('spenpo_resume_before_render', $sections);
+        
         $dom = new DOMDocument('1.0', 'utf-8');
 
+        /**
+         * Creates a new DOM element with specified attributes.
+         * 
+         * @param DOMDocument $dom       The DOM document instance
+         * @param string      $tag       HTML tag name
+         * @param string      $class     CSS class name
+         * @param string|null $id        Optional element ID
+         * @param string|null $text      Optional text content
+         * @param array       $attributes Optional additional attributes
+         * 
+         * @return DOMElement The created element
+         */
         function createElement($dom, $tag, $class, $id = null, $text = null, $attributes = []) {
             $element = $dom->createElement($tag);
             $element->setAttribute('class', $class);
@@ -162,8 +198,28 @@ class ResumeShortcode {
             $root->appendChild($section_div);
         }
         
-        // Convert DOMDocument to HTML string
-        return $dom->saveHTML();
+        /**
+         * Filters the final HTML output of the resume.
+         * 
+         * @since 1.0.0
+         * 
+         * @param string $html     The generated HTML
+         * @param array  $sections The resume sections data
+         * @return string The filtered HTML
+         */
+        $html = apply_filters('spenpo_resume_html_output', $dom->saveHTML(), $sections);
+        
+        /**
+         * Fires after the resume is rendered.
+         *
+         * @since 1.0.0
+         * 
+         * @param string $html     The final HTML output
+         * @param array  $sections The resume sections data
+         */
+        do_action('spenpo_resume_after_render', $html, $sections);
+        
+        return $html;
     }
 }
 
