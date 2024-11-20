@@ -49,7 +49,7 @@ function enqueue_resume_styles() {
     );
 }
 add_action('wp_enqueue_scripts', 'enqueue_resume_styles');
-add_action('init', ['ResumeAPI', 'registerRoutes']); 
+add_action('init', ['\Spenpo\Resume\API\ResumeAPI', 'registerRoutes']); 
 
 // Define plugin constants
 define('SPENPO_RESUME_VERSION', '1.0.0');

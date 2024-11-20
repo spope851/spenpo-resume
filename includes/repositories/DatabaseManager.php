@@ -5,7 +5,13 @@
  * @package Spenpo\Resume
  * @since 1.0.0
  */
+namespace Spenpo\Resume\Repositories;
+
 class DatabaseManager {
+    protected static function requireUpgradeFile() {
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    }
+
     /**
      * Executes an SQL script file.
      * 
@@ -16,7 +22,7 @@ class DatabaseManager {
     public static function executeScript(string $scriptPath, string $type = 'query'): array {
         global $wpdb;
         
-        require_once(ABSPATH.'wp-admin/includes/upgrade.php');
+        static::requireUpgradeFile();
         
         if (!file_exists($scriptPath)) {
             error_log("SQL file not found at: " . $scriptPath);

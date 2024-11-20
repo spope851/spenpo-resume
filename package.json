@@ -12,7 +12,8 @@
 		"lint:js": "wp-scripts lint-js",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start"
+		"start": "wp-scripts start",
+		"test": "./vendor/bin/phpunit -c tests/phpunit.xml"
 	},
 	"devDependencies": {
 		"@wordpress/scripts": "^30.3.0"

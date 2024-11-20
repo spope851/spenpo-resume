@@ -1,4 +1,8 @@
 <?php
+namespace Spenpo\Resume\API;
+use Spenpo\Resume\Repositories\ResumeRepository;
+use WP_REST_Response;
+use stdClass;
 /**
  * Handles all Resume API functionality and route registration.
  * 

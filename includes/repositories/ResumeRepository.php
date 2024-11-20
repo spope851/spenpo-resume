@@ -1,4 +1,8 @@
 <?php
+namespace Spenpo\Resume\Repositories;
+
+use Exception as Exception;
+
 /**
  * Handles database operations for resume data.
  * 
@@ -25,23 +29,41 @@ class ResumeRepository {
      */
     public function getTextSections() {
         try {
-            $results = $this->wpdb->get_results("
+            $query = "
                 SELECT s.*, tc.id as content_id, tc.label, tc.text as content_text
                 FROM {$this->wpdb->prefix}resume_sections s
                 LEFT JOIN {$this->wpdb->prefix}resume_section_text_content tc ON s.id = tc.section_id
                 WHERE s.content_type = 'text'
                 ORDER BY s.display_order, tc.display_order
-            ");
+            ";
+            
+            // var_dump([
+            //     'Before get_results:' => [
+            //         'Query' => $query,
+            //         'WPDB object exists?' => isset($this->wpdb),
+            //         'WPDB methods' => get_class_methods($this->wpdb)
+            //     ]
+            // ]);
+            
+            $results = $this->wpdb->get_results($query);
+            
+            // var_dump([
+            //     'After get_results:' => [
+            //         'Results' => $results,
+            //         'Last Error' => $this->wpdb->last_error
+            //     ]
+            // ]);
             
             if ($this->wpdb->last_error) {
-                error_log('Database error in getTextSections: ' . $this->wpdb->last_error);
-                throw new Exception('Database error occurred');
+                throw new Exception($this->wpdb->last_error);
             }
             
             return $results;
         } catch (Exception $e) {
-            error_log('Error in getTextSections: ' . $e->getMessage());
-            return [];
+            // Log the error
+            error_log('Resume Plugin - Database Error: ' . $e->getMessage());
+            // Re-throw the exception to let calling code handle it
+            throw $e;
         }
     }
 
