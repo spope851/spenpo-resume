@@ -13,6 +13,28 @@ class DatabaseManager {
     }
 
     /**
+     * Gets the table prefix, falling back to a default if needed
+     * 
+     * @return string The table prefix to use
+     */
+    protected static function getTablePrefix(): string {
+        global $wpdb;
+        
+        // First try $wpdb->prefix
+        if (!empty($wpdb->prefix)) {
+            return $wpdb->prefix;
+        }
+        
+        // Then try the test prefix constant
+        if (defined('WP_TESTS_TABLE_PREFIX')) {
+            return WP_TESTS_TABLE_PREFIX;
+        }
+        
+        // Finally, fall back to wp_ as a last resort
+        return 'wp_';
+    }
+
+    /**
      * Executes an SQL script file.
      * 
      * @param string $scriptPath Path to the SQL script file
@@ -42,9 +64,10 @@ class DatabaseManager {
                 ];
             }
     
-            $sql = str_replace('{$wpdb->prefix}', $wpdb->prefix, $sql);
+            $prefix = static::getTablePrefix();
+            $sql = str_replace('{$wpdb->prefix}', $prefix, $sql);
             
-            error_log("SQL content after prefix replacement: " . $sql);
+            // error_log("SQL content after prefix replacement: " . $sql);
     
             $statements = array_filter(
                 array_map(
@@ -55,10 +78,10 @@ class DatabaseManager {
             );
     
             foreach ($statements as $statement) {
-                error_log("Executing statement: " . $statement);
+                // error_log("Executing statement: " . $statement);
                 if ($type === 'init') {
                     $result = dbDelta($statement);
-                    error_log("dbDelta result: " . print_r($result, true));
+                    // error_log("dbDelta result: " . print_r($result, true));
                 } else if ($type === 'query') {
                     $result = $wpdb->query($statement);
                     error_log("wpdb->query result: " . print_r($result, true));
@@ -94,7 +117,8 @@ class DatabaseManager {
         $current_version = get_option('spenpo_resume_db_version', '0');
         $plugin_version = '1.0.0';
         
-        if (version_compare($current_version, $plugin_version, '<')) {
+        // Always recreate database in debug/development environment
+        if (defined('WP_DEBUG') && WP_DEBUG || version_compare($current_version, $plugin_version, '<')) {
             $script_path = plugin_dir_path(dirname(__FILE__)) . '../data/seed.sql';
             $result = self::executeScript($script_path, 'init');
             
@@ -102,6 +126,16 @@ class DatabaseManager {
                 update_option('spenpo_resume_db_version', $plugin_version);
             }
         }
+    }
+
+    /**
+     * Creates or updates the database schema.
+     * 
+     * @return void
+     */
+    public static function createTestDatabase() {
+        $script_path = plugin_dir_path(dirname(__FILE__)) . '../data/test-schema.sql';
+        self::executeScript($script_path, 'init');
     }
 
     /**

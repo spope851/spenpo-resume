@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         bootstrap="bootstrap.php"
-         colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         stopOnFailure="false"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+<phpunit
+    bootstrap="bootstrap.php"
+    backupGlobals="false"
+    colors="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    >
     <coverage>
         <include>
             <directory suffix=".php">../includes</directory>
         </include>
     </coverage>
     <testsuites>
-        <testsuite name="Resume Plugin Test Suite">
+        <testsuite name="unit">
             <directory suffix="Test.php">./Unit</directory>
         </testsuite>
+        <testsuite name="integration">
+            <directory suffix="Test.php">./integration</directory>
+        </testsuite>
     </testsuites>
+    <php>
+        <env name="WP_CORE_DIR" value="../../../../"/>
+        <env name="WP_CONTENT_DIR" value="../../../"/>
+        <env name="WP_PLUGIN_DIR" value="../../"/>
+    </php>
 </phpunit> 

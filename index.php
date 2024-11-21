@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Resume
+ * Plugin Name: Spenpo Resume
  * Description: Example block scaffolded with Create Block tool.
  * Requires at least: 6.6
  * Requires PHP:      7.2
@@ -17,11 +17,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+// Define plugin constants - only if not already defined (for testing compatibility)
+if (!defined('SPENPO_RESUME_PATH')) {
+    define('SPENPO_RESUME_PATH', plugin_dir_path(__FILE__));
+}
+if (!defined('SPENPO_RESUME_URL')) {
+    define('SPENPO_RESUME_URL', plugin_dir_url(__FILE__));
+}
+
+// Include the DatabaseManager class
+require_once SPENPO_RESUME_PATH . 'includes/repositories/DatabaseManager.php';
+
+// Register activation hook with full namespace
+register_activation_hook(__FILE__, ['Spenpo\Resume\Repositories\DatabaseManager', 'createDatabase']);
+
+// Register deactivation hook with full namespace
+register_deactivation_hook(__FILE__, ['Spenpo\Resume\Repositories\DatabaseManager', 'teardownDatabase']);
+
 // Load dependencies
-require_once plugin_dir_path(__FILE__) . 'includes/repositories/DatabaseManager.php';
-require_once plugin_dir_path(__FILE__) . 'includes/repositories/ResumeRepository.php';
-require_once plugin_dir_path(__FILE__) . 'includes/api/ResumeAPI.php';
-require_once plugin_dir_path(__FILE__) . 'includes/shortcodes/ResumeShortcode.php';
+require_once SPENPO_RESUME_PATH . 'includes/repositories/ResumeRepository.php';
+require_once SPENPO_RESUME_PATH . 'includes/api/ResumeAPI.php';
+require_once SPENPO_RESUME_PATH . 'includes/shortcodes/ResumeShortcode.php';
 
 /**
  * Registers the block using the metadata loaded from the `block.json` file.
@@ -35,10 +51,6 @@ function create_block_resume_block_init() {
 }
 add_action( 'init', 'create_block_resume_block_init' );
 
-// Register activation/deactivation hooks
-register_activation_hook(__FILE__, ['DatabaseManager', 'createDatabase']);
-// register_deactivation_hook(__FILE__, ['DatabaseManager', 'teardownDatabase']);
-
 // Register styles
 function enqueue_resume_styles() {
     wp_enqueue_style(
@@ -51,11 +63,19 @@ function enqueue_resume_styles() {
 add_action('wp_enqueue_scripts', 'enqueue_resume_styles');
 add_action('init', ['\Spenpo\Resume\API\ResumeAPI', 'registerRoutes']); 
 
-// Define plugin constants
-define('SPENPO_RESUME_VERSION', '1.0.0');
-define('SPENPO_RESUME_MINIMUM_WP_VERSION', '6.6');
-define('SPENPO_RESUME_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('SPENPO_RESUME_PLUGIN_URL', plugin_dir_url(__FILE__));
+// Move these constant definitions up and add checks
+if (!defined('SPENPO_RESUME_VERSION')) {
+    define('SPENPO_RESUME_VERSION', '1.0.0');
+}
+if (!defined('SPENPO_RESUME_MINIMUM_WP_VERSION')) {
+    define('SPENPO_RESUME_MINIMUM_WP_VERSION', '6.6');
+}
+if (!defined('SPENPO_RESUME_PLUGIN_DIR')) {
+    define('SPENPO_RESUME_PLUGIN_DIR', plugin_dir_path(__FILE__));
+}
+if (!defined('SPENPO_RESUME_PLUGIN_URL')) {
+    define('SPENPO_RESUME_PLUGIN_URL', plugin_dir_url(__FILE__));
+}
 
 // Version compatibility check
 function spenpo_resume_compatibility_check() {
