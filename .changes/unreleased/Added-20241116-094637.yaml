@@ -1,4 +1,0 @@
-kind: Added
-body: seed.sql script that creates the resume tables and is executed against the database
-  as an initialization hook by executeScript function
-time: 2024-11-16T09:46:37.086435+08:00

@@ -1,3 +1,0 @@
-kind: Fixed
-body: logical bug with $type param in executeScript funtion
-time: 2024-11-17T10:50:02.739063+08:00

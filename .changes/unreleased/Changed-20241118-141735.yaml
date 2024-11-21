@@ -1,3 +1,0 @@
-kind: Changed
-body: moved teardown function to uninstall hook
-time: 2024-11-18T14:17:35.708954+08:00
