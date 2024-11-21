@@ -31,4 +31,4 @@ vendor/
 .env
 
 # PHPUnit cache
-.phpunit.result.cache
+**/.phpunit.result.cache

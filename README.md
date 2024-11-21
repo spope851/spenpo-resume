@@ -1,6 +1,6 @@
 # WordPress Resume Plugin
 
-A WordPress plugin that provides a flexible and customizable way to display your resume/CV through shortcodes and blocks.
+A WordPress plugin that provides a flexible and customizable way to display your resume/CV through shortcodes.
 
 ## Description
 
@@ -13,17 +13,17 @@ This plugin allows you to manage and display your resume content in a structured
   - List sections for chronological entries
   - Nested sections for detailed experiences
 - REST API endpoint for headless implementations
+  - [Example implementation](https://spenpo.com/resume)
 - Shortcode support `[spenpo_resume]`
-- Gutenberg block support
 - Customizable display order
 - Optional authentication for API access
-- Responsive design
 
 ## Installation
 
-1. Upload the plugin files to the `/wp-content/plugins/resume` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/spenpo-resume` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress
-3. Use the Settings->Resume Settings screen to configure the plugin
+3. Use the Settings->Resume Settings screen to configure auth settings
+4. A GUI for interacting with the resume data is still under development. You must alter or replace the default data directly in the database for now.
 
 ## Requirements
 
