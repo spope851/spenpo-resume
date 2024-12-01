@@ -1,6 +1,6 @@
 <?php
 // Determine test type from PHPUnit group annotation
-$is_integration = in_array('integration', $_SERVER['argv']);
+$is_integration = isset($_SERVER['argv']) && in_array('integration', $_SERVER['argv']);
 
 if ($is_integration) {
     require_once __DIR__ . '/wp-tests-config.php';

@@ -14,6 +14,11 @@ build/Release
 # Dependency directories
 node_modules/
 vendor/
+bin/
+build/
+src/
+
+package*.json
 
 # Optional npm cache directory
 .npm

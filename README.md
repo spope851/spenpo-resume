@@ -1,4 +1,11 @@
-# WordPress Resume Plugin
+# Spenpo Resume
+
+Contributors:      spenpo
+Tested up to:      6.7
+Stable tag:        1.0.0
+License:           GPLv2 or later
+License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+Tags:              resume, cv
 
 A WordPress plugin that provides a flexible and customizable way to display your resume/CV through shortcodes.
 

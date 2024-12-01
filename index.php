@@ -1,16 +1,17 @@
 <?php
 /**
- * Plugin Name: Spenpo Resume
- * Description: Example block scaffolded with Create Block tool.
+ * Plugin Name:       Spenpo Resume
+ * Plugin URI:        https://github.com/spope851/spenpo-resume
+ * Description:       store, serve, and display your resume data
  * Requires at least: 6.6
  * Requires PHP:      7.2
- * Version:           0.1.0
- * Author:            The WordPress Contributors
- * License:           GPL-2.0-or-later
+ * Version:           1.0.0
+ * Author:            spenpo
+ * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       resume
+ * Text Domain:       spenpo-resume
  *
- * @package CreateBlock
+ * @package spenpo-resume
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -85,9 +86,11 @@ function spenpo_resume_compatibility_check() {
         deactivate_plugins(basename(__FILE__));
         wp_die(
             sprintf(
-                'This plugin requires WordPress version %s or higher. You are running version %s.',
-                SPENPO_RESUME_MINIMUM_WP_VERSION,
-                $wp_version
+                esc_html(
+                    'This plugin requires WordPress version %s or higher. You are running version %s.',
+                    SPENPO_RESUME_MINIMUM_WP_VERSION,
+                    $wp_version
+                )
             )
         );
     }
@@ -97,13 +100,13 @@ register_activation_hook(__FILE__, 'spenpo_resume_compatibility_check');
 
 // Add this to your plugin's initialization
 add_action('admin_init', function() {
-    register_setting('your_plugin_settings', 'resume_api_require_auth');
-    
+    register_setting('spenpo_resume_settings', 'resume_api_require_auth');
+
     add_settings_section(
         'resume_api_settings',
         'Resume API Settings',
         null,
-        'your_plugin_settings'
+        'spenpo_resume_settings'
     );
     
     add_settings_field(
@@ -114,7 +117,7 @@ add_action('admin_init', function() {
             echo '<input type="checkbox" name="resume_api_require_auth" value="1" ' . checked(1, $value, false) . '/>';
             echo '<p class="description">If checked, API requests will require authentication via nonce.</p>';
         },
-        'your_plugin_settings',
+        'spenpo_resume_settings',
         'resume_api_settings'
     );
 }); 
@@ -133,6 +136,7 @@ add_action('admin_menu', function() {
                 <form action="options.php" method="post">
                     <?php
                     settings_fields('resume_plugin_settings');
+                    wp_nonce_field( 'resume_api_require_auth', 'require_auth_nonce' ); // Add a custom nonce.
                     do_settings_sections('resume_plugin_settings');
                     submit_button();
                     ?>

@@ -76,8 +76,21 @@ class ResumeAPI {
         }
 
         // If auth is required, verify nonce
-        $nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
-        return wp_verify_nonce($nonce, 'wp_rest');
+        if ( isset( $_REQUEST['_wpnonce'] ) ) {
+            $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
+            if ( ! wp_verify_nonce( $nonce, 'resume_api_require_auth' ) ) {
+                // Nonce is invalid, return 401 Unauthorized.
+                status_header( 401 ); // Set HTTP status code to 401.
+                echo 'Nonce verification failed';
+                exit;
+            }
+            return wp_verify_nonce($nonce, 'resume_api_require_auth');
+        } else {
+            // Nonce is missing, return 401 Unauthorized.
+            status_header( 401 ); // Set HTTP status code to 401.
+            echo 'Nonce is missing';
+            exit;
+        }
     }
 
     /**

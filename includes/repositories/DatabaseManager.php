@@ -47,64 +47,83 @@ class DatabaseManager {
         static::requireUpgradeFile();
         
         if (!file_exists($scriptPath)) {
-            error_log("SQL file not found at: " . $scriptPath);
+            // error_log("SQL file not found at: " . $scriptPath);
             return [
                 'success' => false,
                 'error' => "SQL file not found: {$scriptPath}"
             ];
         }
-    
-        try {
-            $sql = file_get_contents($scriptPath);
-            if ($sql === false) {
-                error_log("Failed to read SQL file");
-                return [
-                    'success' => false,
-                    'error' => "Failed to read SQL file"
-                ];
-            }
-    
-            $prefix = static::getTablePrefix();
-            $sql = str_replace('{$wpdb->prefix}', $prefix, $sql);
-            
-            // error_log("SQL content after prefix replacement: " . $sql);
-    
-            $statements = array_filter(
-                array_map(
-                    'trim',
-                    explode(';', $sql)
-                ),
-                'strlen'
-            );
-    
-            foreach ($statements as $statement) {
-                // error_log("Executing statement: " . $statement);
-                if ($type === 'init') {
-                    $result = dbDelta($statement);
-                    // error_log("dbDelta result: " . print_r($result, true));
-                } else if ($type === 'query') {
-                    $result = $wpdb->query($statement);
-                    error_log("wpdb->query result: " . print_r($result, true));
-                } else {
-                    error_log("Unknown type: " . $type);
-                }
+
+        if ( ! function_exists( 'WP_Filesystem' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
+        
+        global $wp_filesystem;
+        
+        // Initialize WP_Filesystem
+        if ( WP_Filesystem() ) {
+            $plugin_dir = plugin_dir_path( __FILE__ );
+        
+            // Check if the file exists
+            if ( $wp_filesystem->exists( $scriptPath ) ) {
+                // Read the content
+                $sql = $wp_filesystem->get_contents( $scriptPath );
+        
+                if ( $sql !== false ) {
+                    try {
+                        $prefix = static::getTablePrefix();
+                        $sql = str_replace('{$wpdb->prefix}', esc_sql($prefix), $sql);
+                        
+                        // error_log("SQL content after prefix replacement: " . $sql);
                 
-                if (is_wp_error($result)) {
-                    throw new Exception($result->get_error_message());
+                        $statements = array_filter(
+                            array_map(
+                                'trim',
+                                explode(';', $sql)
+                            ),
+                            'strlen'
+                        );
+                
+                        foreach ($statements as $statement) {
+                            // error_log("Executing statement: " . $statement);
+                            if ($type === 'init') {
+                                $result = dbDelta($statement);
+                                // error_log("dbDelta result: " . print_r($result, true));
+                            } else if ($type === 'query') {
+                                $result = $wpdb->query($statement);
+                                // error_log("wpdb->query result: " . print_r($result, true));
+                            } else {
+                                // error_log("Unknown type: " . $type);
+                            }
+                            
+                            if (is_wp_error($result)) {
+                                throw new Exception($result->get_error_message());
+                            }
+                        }
+                
+                        return [
+                            'success' => true,
+                            'message' => "Script executed successfully"
+                        ];
+                    } catch (Exception $e) {
+                        // error_log("Error in executeScript: " . $e->getMessage());
+                        return [
+                            'success' => false,
+                            'error' => "Error executing script: " . $e->getMessage()
+                        ];
+                    }
+                } else {
+                    // error_log("Failed to read SQL file");
+                    return [
+                        'success' => false,
+                        'error' => "Failed to read SQL file"
+                    ];
                 }
+            } else {
+                echo 'File not found.';
             }
-    
-            return [
-                'success' => true,
-                'message' => "Script executed successfully"
-            ];
-    
-        } catch (Exception $e) {
-            error_log("Error in executeScript: " . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => "Error executing script: " . $e->getMessage()
-            ];
+        } else {
+            echo 'Failed to initialize WP_Filesystem.';
         }
     }
 
