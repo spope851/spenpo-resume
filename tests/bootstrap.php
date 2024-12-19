@@ -16,7 +16,7 @@ if ($is_integration) {
     require_once $wp_tests_dir . '/includes/bootstrap.php';
     
     tests_add_filter('muplugins_loaded', function() {
-        require dirname(__DIR__) . '/index.php';
+        require dirname(__DIR__) . '/spenpo-resume.php';
     });
 } else {
     // Unit test setup - unchanged
