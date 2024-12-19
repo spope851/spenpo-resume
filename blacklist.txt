@@ -1,0 +1,11 @@
+.*
+bin/*
+build/*
+node_modules/*
+spenpo-resume/*
+src/*
+vendor/*
+blacklist.txt
+package*.json
+prepare.sh
+*.zip

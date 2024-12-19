@@ -1,0 +1,4 @@
+kind: Added
+body: prepare script. blacklist for files that can't be submitted to wordpress registry.
+  package json scripts for testing, development, and release prep
+time: 2024-12-19T11:38:18.314259+08:00
