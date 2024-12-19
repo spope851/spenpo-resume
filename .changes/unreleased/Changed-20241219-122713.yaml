@@ -1,0 +1,4 @@
+kind: Changed
+body: adjust blacklist and remove block registration action since I am not using the
+  custom block yet
+time: 2024-12-19T12:27:13.301095+08:00

@@ -1,4 +1,5 @@
-.*
+/.*
+tests/.*
 bin/*
 build/*
 node_modules/*
