@@ -71,14 +71,15 @@ function spenpo_resume_compatibility_check() {
     global $wp_version;
     
     if (version_compare($wp_version, SPENPO_RESUME_MINIMUM_WP_VERSION, '<')) {
-        deactivate_plugins(basename(__FILE__));
-        wp_die(
+        throw new WP_Error(
+            'plugin_dependency_error',
             sprintf(
-                esc_html(
+                esc_html__(
                     'This plugin requires WordPress version %s or higher. You are running version %s.',
-                    SPENPO_RESUME_MINIMUM_WP_VERSION,
-                    $wp_version
-                )
+                    'spenpo-resume'
+                ),
+                SPENPO_RESUME_MINIMUM_WP_VERSION,
+                $wp_version
             )
         );
     }
