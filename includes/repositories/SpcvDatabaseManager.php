@@ -90,7 +90,8 @@ class SpcvDatabaseManager {
                                 $result = dbDelta($statement);
                                 // error_log("dbDelta result: " . print_r($result, true));
                             } else if ($type === 'query') {
-                                $result = $wpdb->query($statement);
+                                $query = $wpdb->prepare($statement);
+                                $result = $wpdb->query($query);
                                 // error_log("wpdb->query result: " . print_r($result, true));
                             } else {
                                 // error_log("Unknown type: " . $type);

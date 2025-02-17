@@ -21,6 +21,11 @@
  *     return '<div class="my-custom-wrapper">' . $html . '</div>';
  * }, 10, 2);
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 $html = apply_filters('spcv_html_output', $dom->saveHTML(), $sections);
 
 /**

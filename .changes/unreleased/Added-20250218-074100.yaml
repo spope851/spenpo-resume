@@ -1,0 +1,3 @@
+kind: Added
+body: check for abspath in hooks file to prevent direct access
+time: 2025-02-18T07:41:00.834534+08:00
