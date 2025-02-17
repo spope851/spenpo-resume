@@ -10,3 +10,4 @@ blacklist.txt
 package*.json
 prepare.sh
 *.zip
+composer*
