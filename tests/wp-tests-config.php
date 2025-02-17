@@ -1,7 +1,7 @@
 <?php
 /* Path to the WordPress codebase you'd like to test */
 if (!defined('ABSPATH')) {
-    define('ABSPATH', dirname(dirname(dirname(dirname(__DIR__)))) . '/');
+    define('ABSPATH', dirname(__DIR__) . '/vendor/wordpress/wordpress/');
 }
 
 /* Test database settings */

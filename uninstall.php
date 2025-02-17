@@ -5,9 +5,9 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 }
 
 // Clean up all plugin data
-require_once plugin_dir_path(__FILE__) . 'includes/repositories/DatabaseManager.php';
-DatabaseManager::teardownDatabase();
+require_once plugin_dir_path(__FILE__) . 'includes/repositories/SpcvDatabaseManager.php';
+SpcvDatabaseManager::teardownDatabase();
 
 // Remove plugin options
-delete_option('spenpo_resume_db_version');
+delete_option('spcv_db_version');
 ?> 

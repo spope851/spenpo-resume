@@ -1,21 +1,21 @@
 <?php
-namespace Spenpo\Resume\Tests\Unit\Shortcodes;
+namespace SPCV\Tests\Unit\Shortcodes;
 
-use Spenpo\Resume\API\ResumeAPI;
-use Spenpo\Resume\Shortcodes\ResumeShortcode;
+use SPCV\API\SpcvResumeAPI;
+use SPCV\Shortcodes\SpcvResumeShortcode;
 use PHPUnit\Framework\TestCase;
 use WP_Mock;
 use ReflectionClass;
 
 // Test-specific subclass
-class TestResumeShortcode extends ResumeShortcode {
+class TestSpcvResumeShortcode extends SpcvResumeShortcode {
     private $apiMock;
 
-    public function __construct(ResumeAPI $apiMock) {
+    public function __construct(SpcvResumeAPI $apiMock) {
         $this->apiMock = $apiMock;
         
         // Use reflection to set the private api property in parent class
-        $reflection = new ReflectionClass(ResumeShortcode::class);
+        $reflection = new ReflectionClass(SpcvResumeShortcode::class);
         $property = $reflection->getProperty('api');
         $property->setAccessible(true);
         $property->setValue($this, $apiMock);
@@ -26,7 +26,7 @@ class TestResumeShortcode extends ResumeShortcode {
     }
 }
 
-class ResumeShortcodeTest extends TestCase {
+class SpcvResumeShortcodeTest extends TestCase {
     private $apiMock;
     private $shortcode;
 
@@ -46,10 +46,10 @@ class ResumeShortcodeTest extends TestCase {
         ]);
 
         // Create API mock
-        $this->apiMock = $this->createMock(ResumeAPI::class);
+        $this->apiMock = $this->createMock(SpcvResumeAPI::class);
         
         // Create shortcode instance
-        $this->shortcode = new TestResumeShortcode($this->apiMock);
+        $this->shortcode = new TestSpcvResumeShortcode($this->apiMock);
     }
 
     public function tearDown(): void {

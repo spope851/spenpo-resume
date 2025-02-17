@@ -32,5 +32,5 @@ if ($is_integration) {
 }
 
 // Common includes
-require_once dirname(__DIR__) . '/includes/repositories/ResumeRepository.php';
-require_once dirname(__DIR__) . '/includes/shortcodes/ResumeShortcode.php';
+require_once dirname(__DIR__) . '/includes/repositories/SpcvResumeRepository.php';
+require_once dirname(__DIR__) . '/includes/shortcodes/SpcvResumeShortcode.php';

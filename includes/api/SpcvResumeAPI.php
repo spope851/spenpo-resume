@@ -1,16 +1,16 @@
 <?php
-namespace Spenpo\Resume\API;
-use Spenpo\Resume\Repositories\ResumeRepository;
+namespace SPCV\API;
+use SPCV\Repositories\SpcvResumeRepository;
 use WP_REST_Response;
 use stdClass;
 /**
  * Handles all Resume API functionality and route registration.
  * 
- * @package Spenpo\Resume
+ * @package Spenpo Resume
  * @since 1.0.0
  */
-class ResumeAPI {
-    /** @var ResumeRepository|null */
+class SpcvResumeAPI {
+    /** @var SpcvResumeRepository|null */
     private $repository = null;
 
     /** @var self|null */
@@ -37,11 +37,11 @@ class ResumeAPI {
     /**
      * Gets or creates the repository instance.
      * 
-     * @return ResumeRepository
+     * @return SpcvResumeRepository
      */
     private function getRepository() {
         if ($this->repository === null) {
-            $this->repository = new ResumeRepository();
+            $this->repository = new SpcvResumeRepository();
         }
         return $this->repository;
     }
@@ -54,7 +54,7 @@ class ResumeAPI {
     public static function registerRoutes() {
         $instance = self::getInstance();
         add_action('rest_api_init', function() use ($instance) {
-            register_rest_route('spenpo/v1', '/resume', [
+            register_rest_route('spcv/v1', '/resume', [
                 'methods' => 'GET',
                 'callback' => [$instance, 'getResumeResponse'],
                 'permission_callback' => [$instance, 'checkPermission'],
@@ -69,7 +69,7 @@ class ResumeAPI {
      */
     public function checkPermission() {
         // Get the authentication setting (you'll need to implement this setting in your plugin)
-        $require_auth = get_option('resume_api_require_auth', false);
+        $require_auth = get_option('spcv_resume_api_require_auth', false);
         
         if (!$require_auth) {
             return true;
@@ -78,13 +78,13 @@ class ResumeAPI {
         // If auth is required, verify nonce
         if ( isset( $_REQUEST['_wpnonce'] ) ) {
             $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
-            if ( ! wp_verify_nonce( $nonce, 'resume_api_require_auth' ) ) {
+            if ( ! wp_verify_nonce( $nonce, 'spcv_resume_api_require_auth' ) ) {
                 // Nonce is invalid, return 401 Unauthorized.
                 status_header( 401 ); // Set HTTP status code to 401.
                 echo 'Nonce verification failed';
                 exit;
             }
-            return wp_verify_nonce($nonce, 'resume_api_require_auth');
+            return wp_verify_nonce($nonce, 'spcv_resume_api_require_auth');
         } else {
             // Nonce is missing, return 401 Unauthorized.
             status_header( 401 ); // Set HTTP status code to 401.

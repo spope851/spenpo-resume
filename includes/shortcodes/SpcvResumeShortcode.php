@@ -1,26 +1,26 @@
 <?php
-namespace Spenpo\Resume\Shortcodes;
+namespace SPCV\Shortcodes;
 
-use Spenpo\Resume\API\ResumeAPI;
+use SPCV\API\SpcvResumeAPI;
 use DOMDocument;
 use DOMElement;
 
 /**
- * Handles the [spenpo_resume] shortcode functionality.
+ * Handles the [spcv_resume] shortcode functionality.
  * 
- * @package Spenpo\Resume
+ * @package Spenpo Resume
  * @since 1.0.0
  */
-class ResumeShortcode {
-    /** @var ResumeAPI Instance of the Resume API */
+class SpcvResumeShortcode {
+    /** @var SpcvResumeAPI Instance of the Resume API */
     private $api;
 
     /**
      * Constructor initializes the API connection and registers the shortcode.
      */
     public function __construct() {
-        $this->api = $this->getAPI();
-        add_shortcode('spenpo_resume', [$this, 'render']);
+        $this->api = $this->getApi();
+        add_shortcode('spcv_resume', [$this, 'render']);
     }
 
     /**
@@ -71,7 +71,7 @@ class ResumeShortcode {
          * 
          * @param array $sections The resume sections data
          */
-        do_action('spenpo_resume_before_render', $sections);
+        do_action('spcv_before_render', $sections);
         
         $dom = new DOMDocument('1.0', 'utf-8');
 
@@ -213,7 +213,7 @@ class ResumeShortcode {
          * @param array  $sections The resume sections data
          * @return string The filtered HTML
          */
-        $html = apply_filters('spenpo_resume_html_output', $dom->saveHTML(), $sections);
+        $html = apply_filters('spcv_html_output', $dom->saveHTML(), $sections);
         
         /**
          * Fires after the resume is rendered.
@@ -223,16 +223,16 @@ class ResumeShortcode {
          * @param string $html     The final HTML output
          * @param array  $sections The resume sections data
          */
-        do_action('spenpo_resume_after_render', $html, $sections);
+        do_action('spcv_after_render', $html, $sections);
         
         return $html;
     }
 
     // New protected method for better testability
-    protected function getAPI() {
-        return ResumeAPI::getInstance();
+    protected function getApi() {
+        return SpcvResumeAPI::getInstance();
     }
 }
 
 // Initialize shortcode
-new ResumeShortcode(); 
+new SpcvResumeShortcode(); 

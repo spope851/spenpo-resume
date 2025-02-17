@@ -1,5 +1,5 @@
 <?php
-namespace Spenpo\Resume\Tests\Unit\Repositories;
+namespace SPCV\Tests\Unit\Repositories;
 
 use WP_Mock;
 use PHPUnit\Framework\TestCase;

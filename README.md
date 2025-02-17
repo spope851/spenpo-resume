@@ -95,15 +95,15 @@ npm run build
 ## Hooks and Filters
 
 ### Actions
-- `spenpo_resume_before_render`: Fires before the resume is rendered
+- `spcv_before_render`: Fires before the resume is rendered
   - Parameters: `array $sections` - The resume sections data
-- `spenpo_resume_after_render`: Fires after the resume is rendered
+- `spcv_after_render`: Fires after the resume is rendered
   - Parameters: 
     - `string $html` - The final HTML output
     - `array $sections` - The resume sections data
 
 ### Filters
-- `spenpo_resume_html_output`: Filter the final HTML output
+- `spcv_html_output`: Filter the final HTML output
   - Parameters:
     - `string $html` - The generated HTML
     - `array $sections` - The resume sections data
@@ -112,15 +112,15 @@ npm run build
 ### Examples
 ```php
 // Add a wrapper div around the resume
-add_filter('spenpo_resume_html_output', function($html, $sections) {
+add_filter('spcv_html_output', function($html, $sections) {
 return '<div class="my-custom-wrapper">' . $html . '</div>';
 }, 10, 2);
 // Log resume rendering
-add_action('spenpo_resume_before_render', function($sections) {
+add_action('spcv_before_render', function($sections) {
 error_log('Resume rendering started with ' . count($sections) . ' sections');
 });
 // Cache the rendered resume
-add_action('spenpo_resume_after_render', function($html, $sections) {
+add_action('spcv_after_render', function($html, $sections) {
 wp_cache_set('resume_html', $html, 'spenpo_resume', 3600);
 }, 10, 2);
 ```

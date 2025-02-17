@@ -23,12 +23,14 @@
     ],
     "autoload": {
         "psr-4": {
-            "Spenpo\\Resume\\": "includes/"
+            "SPCV\\Repositories\\": "includes/repositories/",
+            "SPCV\\API\\": "includes/api/",
+            "SPCV\\Shortcodes\\": "includes/shortcodes/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Spenpo\\Resume\\Tests\\": "tests/"
+            "SPCV\\Tests\\": "tests/"
         }
     },
     "scripts": {

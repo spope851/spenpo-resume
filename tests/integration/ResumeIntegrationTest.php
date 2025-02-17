@@ -1,5 +1,5 @@
 <?php
-namespace Spenpo\Resume\Tests\Integration;
+namespace SPCV\Tests\Integration;
 
 use WP_UnitTestCase;
 
@@ -10,7 +10,7 @@ class ResumeIntegrationTest extends WP_UnitTestCase {
     protected function setUp(): void {
         parent::setUp();
         
-        \Spenpo\Resume\Repositories\DatabaseManager::createTestDatabase();
+        \SPCV\Repositories\SpcvDatabaseManager::createTestDatabase();
         
         // Load test data if needed
         $this->loadTestData();

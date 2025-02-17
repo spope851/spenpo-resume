@@ -1,9 +1,9 @@
 <?php
 
-namespace Spenpo\Resume\Tests\Unit\API;
+namespace SPCV\Tests\Unit\API;
 
-use Spenpo\Resume\API\ResumeAPI;
-use Spenpo\Resume\Repositories\ResumeRepository;
+use SPCV\API\SpcvResumeAPI;
+use SPCV\Repositories\SpcvResumeRepository;
 use PHPUnit\Framework\TestCase;
 use WP_Mock;
 use stdClass;
@@ -37,10 +37,10 @@ class ResumeAPITest extends TestCase {
         ]);
 
         // Create mock repository
-        $this->repository = $this->createMock(ResumeRepository::class);
+        $this->repository = $this->createMock(SpcvResumeRepository::class);
         
         // Get API instance and inject mock repository using reflection
-        $this->api = ResumeAPI::getInstance();
+        $this->api = SpcvResumeAPI::getInstance();
         $reflection = new \ReflectionClass($this->api);
         $property = $reflection->getProperty('repository');
         $property->setAccessible(true);
@@ -50,15 +50,15 @@ class ResumeAPITest extends TestCase {
     public function tearDown(): void {
         WP_Mock::tearDown();
         // Reset singleton instance
-        $reflection = new \ReflectionClass(ResumeAPI::class);
+        $reflection = new \ReflectionClass(SpcvResumeAPI::class);
         $property = $reflection->getProperty('instance');
         $property->setAccessible(true);
         $property->setValue(null, null);
     }
 
     public function testGetInstance() {
-        $instance1 = ResumeAPI::getInstance();
-        $instance2 = ResumeAPI::getInstance();
+        $instance1 = SpcvResumeAPI::getInstance();
+        $instance2 = SpcvResumeAPI::getInstance();
         $this->assertSame($instance1, $instance2);
     }
 
@@ -120,7 +120,7 @@ class ResumeAPITest extends TestCase {
         $mockData = [$this->createSectionObject('text', 1)];
         
         // Create partial mock of ResumeAPI to mock fetchResume
-        $apiMock = $this->getMockBuilder(ResumeAPI::class)
+        $apiMock = $this->getMockBuilder(SpcvResumeAPI::class)
             ->onlyMethods(['fetchResume'])
             ->disableOriginalConstructor()
             ->getMock();

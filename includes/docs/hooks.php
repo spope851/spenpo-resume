@@ -2,7 +2,7 @@
 /**
  * Documentation for all hooks (actions and filters) provided by the Resume plugin.
  * 
- * @package Spenpo\Resume
+ * @package Spenpo Resume
  * @since 1.0.0
  */
 
@@ -17,11 +17,11 @@
  * 
  * @example
  * // Add a wrapper div around the resume
- * add_filter('spenpo_resume_html_output', function($html, $sections) {
+ * add_filter('spcv_html_output', function($html, $sections) {
  *     return '<div class="my-custom-wrapper">' . $html . '</div>';
  * }, 10, 2);
  */
-$html = apply_filters('spenpo_resume_html_output', $dom->saveHTML(), $sections);
+$html = apply_filters('spcv_html_output', $dom->saveHTML(), $sections);
 
 /**
  * Action that fires before the resume is rendered.
@@ -32,11 +32,11 @@ $html = apply_filters('spenpo_resume_html_output', $dom->saveHTML(), $sections);
  * 
  * @example
  * // Log resume rendering
- * add_action('spenpo_resume_before_render', function($sections) {
+ * add_action('spcv_before_render', function($sections) {
  *     error_log('Resume rendering started with ' . count($sections) . ' sections');
  * });
  */
-do_action('spenpo_resume_before_render', $sections);
+do_action('spcv_before_render', $sections);
 
 /**
  * Action that fires after the resume is rendered.
@@ -48,8 +48,8 @@ do_action('spenpo_resume_before_render', $sections);
  * 
  * @example
  * // Cache the rendered resume
- * add_action('spenpo_resume_after_render', function($html, $sections) {
+ * add_action('spcv_after_render', function($html, $sections) {
  *     wp_cache_set('resume_html', $html, 'spenpo_resume', 3600);
  * }, 10, 2);
  */
-do_action('spenpo_resume_after_render', $html, $sections); 
+do_action('spcv_after_render', $html, $sections); 

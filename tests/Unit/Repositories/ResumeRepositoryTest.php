@@ -1,9 +1,9 @@
 <?php
-namespace Spenpo\Resume\Tests\Unit\Repositories;
+namespace SPCV\Tests\Unit\Repositories;
 
 use WP_Mock;
 use PHPUnit\Framework\TestCase;
-use Spenpo\Resume\Repositories\ResumeRepository;
+use SPCV\Repositories\SpcvResumeRepository;
 
 class ResumeRepositoryTest extends TestCase {
     private $repository;
@@ -27,7 +27,7 @@ class ResumeRepositoryTest extends TestCase {
         $wpdb = $this->wpdb;
         
         // Now create the repository
-        $this->repository = new ResumeRepository();
+        $this->repository = new SpcvResumeRepository();
         
         // Verify the mock setup
         // var_dump([
@@ -54,8 +54,8 @@ class ResumeRepositoryTest extends TestCase {
         // Set up wpdb mock with specific query
         $expectedQuery = "
                 SELECT s.*, tc.id as content_id, tc.label, tc.text as content_text
-                FROM {$this->wpdb->prefix}resume_sections s
-                LEFT JOIN {$this->wpdb->prefix}resume_section_text_content tc ON s.id = tc.section_id
+                FROM {$this->wpdb->prefix}spcv_resume_sections s
+                LEFT JOIN {$this->wpdb->prefix}spcv_resume_section_text_content tc ON s.id = tc.section_id
                 WHERE s.content_type = 'text'
                 ORDER BY s.display_order, tc.display_order
             ";

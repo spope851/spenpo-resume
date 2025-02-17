@@ -2,12 +2,12 @@
 /**
  * Manages database operations for the resume plugin.
  * 
- * @package Spenpo\Resume
+ * @package Spenpo Resume
  * @since 1.0.0
  */
-namespace Spenpo\Resume\Repositories;
+namespace SPCV\Repositories;
 
-class DatabaseManager {
+class SpcvDatabaseManager {
     protected static function requireUpgradeFile() {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     }
@@ -106,7 +106,7 @@ class DatabaseManager {
                             'message' => "Script executed successfully"
                         ];
                     } catch (Exception $e) {
-                        // error_log("Error in executeScript: " . $e->getMessage());
+                        // error_log("Error in spcvExecuteScript: " . $e->getMessage());
                         return [
                             'success' => false,
                             'error' => "Error executing script: " . $e->getMessage()
@@ -133,7 +133,7 @@ class DatabaseManager {
      * @return void
      */
     public static function createDatabase() {
-        $current_version = get_option('spenpo_resume_db_version', '0');
+        $current_version = get_option('spcv_db_version', '0');
         $plugin_version = '1.0.0';
         
         // Always recreate database in debug/development environment
@@ -142,7 +142,7 @@ class DatabaseManager {
             $result = self::executeScript($script_path, 'init');
             
             if ($result['success']) {
-                update_option('spenpo_resume_db_version', $plugin_version);
+                update_option('spcv_db_version', $plugin_version);
             }
         }
     }
