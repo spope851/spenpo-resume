@@ -1,3 +1,0 @@
-kind: Changed
-body: removed duplicate register_setting. added sanitize_callback to api auth setting
-time: 2024-12-30T08:47:12.548197+08:00
