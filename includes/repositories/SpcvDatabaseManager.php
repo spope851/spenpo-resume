@@ -135,7 +135,7 @@ class SpcvDatabaseManager {
      */
     public static function createDatabase() {
         $current_version = get_option('spcv_db_version', '0');
-        $plugin_version = '1.0.0';
+        $plugin_version = '1.0.3';
         
         // Always recreate database in debug/development environment
         if (defined('WP_DEBUG') && WP_DEBUG || version_compare($current_version, $plugin_version, '<')) {

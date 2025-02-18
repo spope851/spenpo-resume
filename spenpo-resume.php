@@ -5,7 +5,7 @@
  * Description:       store, serve, and display your resume data
  * Requires at least: 6.6
  * Requires PHP:      7.2
- * Version:           1.0.0
+ * Version:           1.0.3
  * Author:            spenpo
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -54,7 +54,7 @@ add_action('init', ['SPCV\API\SpcvResumeAPI', 'registerRoutes']);
 
 // Move these constant definitions up and add checks
 if (!defined('SPCV_VERSION')) {
-    define('SPCV_VERSION', '1.0.0');
+    define('SPCV_VERSION', '1.0.3');
 }
 if (!defined('SPCV_MINIMUM_WP_VERSION')) {
     define('SPCV_MINIMUM_WP_VERSION', '6.6');
