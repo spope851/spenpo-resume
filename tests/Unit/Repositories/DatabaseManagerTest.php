@@ -72,7 +72,7 @@ class DatabaseManagerTest extends TestCase {
         $mock->shouldReceive('createDatabase')
             ->once()
             ->andReturnUsing(function() {
-                update_option('spenpo_resume_db_version', '1.0.3');
+                update_option('spenpo_resume_db_version', '1.0.4');
                 return true;
             });
 

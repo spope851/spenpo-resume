@@ -1,4 +1,0 @@
-kind: Changed
-body: activation and deactivation hook manipulate the db through DbDelta instead of
-  executing sql scripts
-time: 2025-02-19T17:38:18.88398+08:00
