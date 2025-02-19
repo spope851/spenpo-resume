@@ -156,7 +156,8 @@ class SpcvDatabaseManager {
         );
 
         foreach ($tables as $table) {
-            $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$table}");
+            $preparedQuery = $wpdb->prepare("DROP TABLE IF EXISTS {$wpdb->prefix}{$table}");
+            $wpdb->query($preparedQuery);
         }
     }
 
