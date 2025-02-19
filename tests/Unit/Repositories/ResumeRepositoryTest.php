@@ -14,7 +14,7 @@ class ResumeRepositoryTest extends TestCase {
         
         // Create a mock object that preserves original properties
         $this->wpdb = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['get_results'])
+            ->addMethods(['get_results', 'prepare'])
             ->setMockClassName('wpdb')
             ->getMock();
         
@@ -56,9 +56,11 @@ class ResumeRepositoryTest extends TestCase {
                 SELECT s.*, tc.id as content_id, tc.label, tc.text as content_text
                 FROM {$this->wpdb->prefix}spcv_resume_sections s
                 LEFT JOIN {$this->wpdb->prefix}spcv_resume_section_text_content tc ON s.id = tc.section_id
-                WHERE s.content_type = 'text'
+                WHERE s.content_type = %s
                 ORDER BY s.display_order, tc.display_order
             ";
+
+        $preparedQuery = sprintf($expectedQuery, 'text');
         
         // var_dump([
         //     'Before setting up mock:' => [
@@ -68,8 +70,13 @@ class ResumeRepositoryTest extends TestCase {
         // ]);
         
         $this->wpdb->expects($this->once())
+            ->method('prepare')
+            ->with($expectedQuery, 'text')
+            ->willReturn($preparedQuery);
+
+        $this->wpdb->expects($this->once())
             ->method('get_results')
-            ->with($expectedQuery)  // Verify the exact query being used
+            ->with($preparedQuery)  // Verify the exact query being used
             ->willReturn($expected);
 
         // Execute test

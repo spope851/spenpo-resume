@@ -133,26 +133,6 @@ class SpcvDatabaseManager {
      * 
      * @return void
      */
-    public static function createDatabase() {
-        $current_version = get_option('spcv_db_version', '0');
-        $plugin_version = '1.0.3';
-        
-        // Always recreate database in debug/development environment
-        if (defined('WP_DEBUG') && WP_DEBUG || version_compare($current_version, $plugin_version, '<')) {
-            $script_path = plugin_dir_path(dirname(__FILE__)) . '../data/seed.sql';
-            $result = self::executeScript($script_path, 'init');
-            
-            if ($result['success']) {
-                update_option('spcv_db_version', $plugin_version);
-            }
-        }
-    }
-
-    /**
-     * Creates or updates the database schema.
-     * 
-     * @return void
-     */
     public static function createTestDatabase() {
         $script_path = plugin_dir_path(dirname(__FILE__)) . '../data/test-schema.sql';
         self::executeScript($script_path, 'init');
@@ -164,7 +144,108 @@ class SpcvDatabaseManager {
      * @return void
      */
     public static function teardownDatabase() {
-        $script_path = plugin_dir_path(dirname(__FILE__)) . '../data/teardown.sql';
-        self::executeScript($script_path, 'query');
+        global $wpdb;
+        
+        // Drop tables in reverse order to respect foreign key constraints
+        $tables = array(
+            'spcv_resume_nested_section_details',
+            'spcv_resume_nested_sections',
+            'spcv_resume_section_text_content',
+            'spcv_resume_section_items',
+            'spcv_resume_sections'
+        );
+
+        foreach ($tables as $table) {
+            $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$table}");
+        }
+    }
+
+    public static function createDatabase() {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = array();
+
+        // Resume Sections table
+        $sql[] = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}spcv_resume_sections` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `title` varchar(255) NOT NULL,
+            `default_expanded` tinyint(1) DEFAULT 0,
+            `content_type` enum('text','list','nested') NOT NULL,
+            `display_order` int(11) NOT NULL,
+            PRIMARY KEY  (`id`),
+            UNIQUE KEY `unique_display_order` (`display_order`)
+        ) $charset_collate;";
+
+        // Section Items table
+        $sql[] = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}spcv_resume_section_items` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `section_id` int(11) NOT NULL,
+            `text` text NOT NULL,
+            `year` YEAR DEFAULT NULL,
+            `link` varchar(255) DEFAULT NULL,
+            `year_link` varchar(255) DEFAULT NULL,
+            `indent` int(11) DEFAULT 0,
+            `display_order` int(11) DEFAULT NULL,
+            PRIMARY KEY  (`id`),
+            FOREIGN KEY (`section_id`) REFERENCES `{$wpdb->prefix}spcv_resume_sections` (`id`)
+        ) $charset_collate;";
+
+        // Section Text Content table
+        $sql[] = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}spcv_resume_section_text_content` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `section_id` int(11) NOT NULL,
+            `label` varchar(255) DEFAULT NULL,
+            `text` text NOT NULL,
+            `display_order` int(11) NOT NULL,
+            PRIMARY KEY  (`id`),
+            FOREIGN KEY (`section_id`) REFERENCES `{$wpdb->prefix}spcv_resume_sections` (`id`)
+        ) $charset_collate;";
+
+        // Nested Sections table
+        $sql[] = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}spcv_resume_nested_sections` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `section_id` int(11) NOT NULL,
+            `title` varchar(255) NOT NULL,
+            `link_title` varchar(255) NOT NULL,
+            `href` varchar(255) NOT NULL,
+            `start_year` YEAR DEFAULT NULL,
+            `end_year` YEAR DEFAULT NULL,
+            `custom_sub_title` varchar(255),
+            `sub_title` varchar(255) GENERATED ALWAYS AS (
+                CASE 
+                    WHEN custom_sub_title IS NOT NULL
+                        THEN custom_sub_title
+                    WHEN start_year IS NOT NULL AND end_year IS NOT NULL 
+                        THEN CONCAT(start_year, ' - ', end_year)
+                    WHEN start_year IS NOT NULL AND end_year IS NULL
+                        THEN CONCAT(start_year, ' - present') 
+                    ELSE NULL
+                END
+            ) STORED,
+            `display_order` int(11) DEFAULT NULL,
+            PRIMARY KEY  (`id`),
+            FOREIGN KEY (`section_id`) REFERENCES `{$wpdb->prefix}spcv_resume_sections` (`id`)
+        ) $charset_collate;";
+
+        // Nested Section Details table
+        $sql[] = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}spcv_resume_nested_section_details` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `nested_section_id` int(11) NOT NULL,
+            `text` text DEFAULT NULL,
+            `title` varchar(255) DEFAULT NULL,
+            `sub_title` varchar(255) DEFAULT NULL,
+            `indent` int(11) DEFAULT 0,
+            `display_order` int(11) NOT NULL,
+            PRIMARY KEY  (`id`),
+            FOREIGN KEY (`nested_section_id`) REFERENCES `{$wpdb->prefix}spcv_resume_nested_sections` (`id`)
+        ) $charset_collate;";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        
+        // Execute each CREATE TABLE query
+        foreach ($sql as $query) {
+            dbDelta($query);
+        }
     }
 } 

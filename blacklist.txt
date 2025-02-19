@@ -1,5 +1,6 @@
 /.*
 tests/*
+data/*
 bin/*
 build/*
 node_modules/*

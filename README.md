@@ -40,6 +40,13 @@ This plugin allows you to manage and display your resume content in a structured
 
 ## Usage
 
+### Data
+- Use [this script](https://github.com/spope851/spenpo-resume/blob/main/data/seed.sql) to populate the database with an example resume
+- Remember to replace the `{$wpdb->prefix}` with the correct prefix for your WordPress installation
+- The example uses each section type and demonstrates the flexibility of the shortcode
+- Use SQL to alter the data as needed
+- In v1, there is no UI for managing the data
+
 ### Shortcode
 Add your resume to any post or page using the shortcode:
 
